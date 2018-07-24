@@ -1,0 +1,135 @@
+﻿@page
+@model Tracking_Events.Pages.Events.IndexModel
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Events";
+    string Zone;
+
+    try
+    {
+        Zone = UserManager.GetUserAsync(User).Result.TimeZone;
+    }
+    catch
+    {
+        Zone = null;
+    }
+}
+
+<h2>@ViewData["Title"]</h2>
+@Html.Partial("./Account/Manage/_StatusMessage", Model.StatusMessage)
+
+<form class="form-inline" asp-page="./Index" method="get" asp-route-sortOrder="@Model.CurrentSort">
+    <div class="form-group">
+        <label>Venue Filter:</label>
+        <input name="searchVenue" value="@Model.CurrentVenueSearch" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Genre Filter:</label>
+        <input name="searchGenre" value="@Model.CurrentGenreSearch" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Zip Filter:</label>
+        <input name="searchZip" value="@Model.CurrentZipSearch" class="form-control" />
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Filter" class="btn btn-info btn-sm" /> |
+        <a asp-page="./Index">Back to full list</a>
+    </div>
+</form>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr class="info">
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.VenueNameSort" asp-route-searchVenue="@Model.CurrentVenueSearch" asp-route-searchGenre="@Model.CurrentGenreSearch" asp-route-searchZip="@Model.CurrentZipSearch">
+                    @Html.DisplayNameFor(model => model.Event[0].Venue.VenueName)
+                </a>
+            </th>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.EventNameSort" asp-route-searchVenue="@Model.CurrentVenueSearch" asp-route-searchGenre="@Model.CurrentGenreSearch" asp-route-searchZip="@Model.CurrentZipSearch">
+                    @Html.DisplayNameFor(model => model.Event[0].EventName)
+                </a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Genre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].AgeRequirement)
+            </th>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.StartTimeSort" asp-route-searchVenue="@Model.CurrentVenueSearch" asp-route-searchGenre="@Model.CurrentGenreSearch" asp-route-searchZip="@Model.CurrentZipSearch">
+                    @Html.DisplayNameFor(model => model.Event[0].StartTime)
+                </a>
+            </th>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.EndTimeSort" asp-route-searchVenue="@Model.CurrentVenueSearch" asp-route-searchGenre="@Model.CurrentGenreSearch" asp-route-searchZip="@Model.CurrentZipSearch">
+                    @Html.DisplayNameFor(model => model.Event[0].EndTime)
+                </a>
+            </th>
+            <th>
+                RSVP/@Html.DisplayNameFor(model => model.Event[0].Capacity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Venue.State)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Venue.Zip)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Venue.VenueType)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Event)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Venue.VenueName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EventName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Genre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AgeRequirement)+
+                </td>
+                <td>
+                    @TimeZoneInfo.ConvertTimeFromUtc(item.StartTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+                </td>
+                <td>
+                    @TimeZoneInfo.ConvertTimeFromUtc(item.EndTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+                </td>
+                <td style="text-align:center">
+                    @item.Rsvps.Where(r => r.Event.EventID == item.EventID).Sum(r => r.RSVPCount)/@Html.DisplayFor(modelItem => item.Capacity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Venue.State)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Venue.Zip)
+                </td>
+                <td>
+                    @(((Account.VenueType)item.Venue.VenueType).ToString())
+                </td>
+                <td>
+                    <a asp-page="./Details" asp-route-id="@item.EventID">Details</a>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        @if (item.Capacity > item.Rsvps.Where(r => r.Event.EventID == item.EventID).Sum(r => r.RSVPCount) && UserManager.GetUserAsync(User).Result.AccountType == 1)
+                        {
+                            <span> | </span>
+                            <form asp-route-id="@item.EventID" asp-route-rsvpAmount="@Model.RSVPAmount" method="post">
+                                <input type="number" asp-for="@Model.RSVPAmount" min="1" max="@(item.Capacity - item.Rsvps.Count)" />
+                                <button type="submit">RSVP</button>
+                            </form>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

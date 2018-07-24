@@ -1,0 +1,57 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.ManageRSVPsModel
+
+@{
+    ViewData["Title"] = "Manage RSVPs";
+}
+
+<h2>@ViewData["Title"]</h2>
+@Html.Partial("./Account/Manage/_StatusMessage", Model.StatusMessage)
+
+<form class="form-inline" asp-page="./ManageRSVPs" method="get">
+    <div class="form-group">
+        <label>Venue Filter:</label>
+        <input name="searchVenue" value="@Model.CurrentVenurSearch" class="form-control" />
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Filter" class="btn btn-info btn-sm" /> |
+        <a asp-page="./ManageRSVPs">Back to full list</a>
+    </div>
+</form>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr class="info">
+            <th>
+                @Html.DisplayNameFor(model => model.RSVPs[0].Event.Venue.VenueName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RSVPs[0].Event.EventName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RSVPs[0].RSVPCount)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.RSVPs)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Event.Venue.VenueName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Event.EventName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RSVPCount)
+                </td>
+                <td>
+                    <a asp-page="./ManageRSVPsEdit" asp-route-id="@item.RsvpID">Edit</a> |
+                    <a asp-page="./ManageRSVPsDetails" asp-route-id="@item.RsvpID">Details</a> |
+                    <a asp-page="./ManageRSVPsDelete" asp-route-id="@item.RsvpID">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

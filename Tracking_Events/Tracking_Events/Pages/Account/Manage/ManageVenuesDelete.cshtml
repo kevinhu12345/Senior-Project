@@ -1,0 +1,63 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.ManageVenuesDeleteModel
+
+@{
+    ViewData["Title"] = "Delete Venue";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Venue.VenueName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Venue.VenueName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Venue.Address)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Venue.Address)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Venue.City)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Venue.City)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Venue.State)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Venue.State)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Venue.Zip)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Venue.Zip)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Venue.Capacity)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Venue.Capacity)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Venue.VenueType)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.VenueType)
+        </dd>
+    </dl>
+    
+    <form method="post">
+        <input type="hidden" asp-for="Venue.VenueID" />
+        <input type="submit" value="Delete" class="btn btn-danger btn-sm" /> |
+        <a asp-page="./ManageVenues">Back to List</a>
+    </form>
+</div>

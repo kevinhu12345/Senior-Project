@@ -1,0 +1,41 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.ManageRSVPsEditModel
+@inject ApplicationDbContext Context
+@{
+    ViewData["Title"] = "ManageRSVPsEdit";
+}
+
+<h2>ManageRSVPsEdit</h2>
+
+<h4>RSVP</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <label>
+            @Html.DisplayNameFor(model => model.RSVP.Event.EventName)
+        </label>
+        <input value="@Html.DisplayFor(model => model.RSVP.Event.EventName)" disabled />
+        <br />
+        <br />
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="RSVP.RsvpID" />
+            <div class="form-group">
+                <label asp-for="RSVP.RSVPCount" class="control-label"></label>
+                <input min="1" max="@(Model.RSVP.Event.Capacity - @Context.RSVP.Where(r => r.Event.EventID == Model.RSVP.Event.EventID).Sum(r => r.RSVPCount) + Model.RSVP.RSVPCount)" asp-for="RSVP.RSVPCount" value="@Model.RSVP.RSVPCount" class="form-control" />
+                <span asp-validation-for="RSVP.RSVPCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-success btn-sm" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./ManageRSVPs">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

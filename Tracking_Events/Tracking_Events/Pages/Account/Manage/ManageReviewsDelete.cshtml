@@ -1,0 +1,48 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.ManageReviewsDeleteModel
+
+@{
+    ViewData["Title"] = "Delete Reviews";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Review</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Review.Venue.VenueName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Review.Venue.VenueName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Review.Event.EventName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Review.Event.EventName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Review.Rating)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Review.Rating)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Review.Description)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Review.Description)
+        </dd>
+    </dl>
+    
+    <form method="post">
+        <input type="hidden" asp-for="Review.EventID" />
+        <input type="hidden" asp-for="Review.VenueID" />
+        <input type="hidden" asp-for="Review.UserID" />
+        <input type="submit" value="Delete" class="btn btn-warning btn-sm" /> |
+        <a asp-page="./ManageReviews">Back to List</a>
+    </form>
+</div>

@@ -1,0 +1,57 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.ManageReviewsEditModel
+
+@{
+    ViewData["Title"] = "Edit Review";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<hr />
+<div class="row">   
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Review.EventID" />
+            <input type="hidden" asp-for="Review.VenueID" />
+            <input type="hidden" asp-for="Review.UserID" />
+            <div class="form-group">
+                <label asp-for="Review.Venue.VenueName" class="control-label"></label>
+                <input asp-for="Review.Venue.VenueName" class="form-control" disabled />
+                <span asp-validation-for="Review.Venue.VenueName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Review.Event.EventName" class="control-label"></label>
+                <input asp-for="Review.Event.EventName" class="form-control" disabled />
+                <span asp-validation-for="Review.Event.EventName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Review.Rating" class="control-label"></label>
+                <select asp-for="Review.Rating" class="form-control">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+                <span asp-validation-for="Review.Rating" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Review.Description" class="control-label"></label>
+                <input asp-for="Review.Description" class="form-control" />
+                <span asp-validation-for="Review.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-success btn-sm" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./ManageReviews">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,95 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.ManageEventsModel
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Manage Events";
+    string Zone;
+
+    try
+    {
+        Zone = UserManager.GetUserAsync(User).Result.TimeZone;
+    }
+    catch
+    {
+        Zone = null;
+    }
+}
+
+<h2>@ViewData["Title"]</h2>
+@Html.Partial("./Account/Manage/_StatusMessage", Model.StatusMessage)
+
+<p>
+    <a asp-page="./ManageEventsCreate">Create New</a>
+</p>
+<form class="form-inline" asp-page="./ManageEvents" method="get">
+    <div class="form-group">
+        <label>Event Filter:</label>
+        <input name="searchEvent" value="@Model.CurrentEventSearch" class="form-control" />
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Filter" class="btn btn-info btn-sm" /> |
+        <a asp-page="./ManageEvents">Back to full list</a>
+    </div>
+</form>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr class="info">
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].EventName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Genre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].AgeRequirement)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].StartTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].EndTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Capacity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Description)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Event)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EventName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Genre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AgeRequirement)
+                </td>
+                <td>
+                    @TimeZoneInfo.ConvertTimeFromUtc(item.StartTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+                </td>
+                <td>
+                    @TimeZoneInfo.ConvertTimeFromUtc(item.EndTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Capacity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    <a asp-page="./ManageEventsEdit" asp-route-id="@item.EventID">Edit</a> |
+                    <a asp-page="./ManageEventsDelete" asp-route-id="@item.EventID">Delete</a> |
+                    <a asp-page="./RSVPList" asp-route-id="@item.EventID">RSVP List</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,13 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.DeleteConfirmModel
+@{
+    ViewData["Title"] = "Delete Confirmation";
+}
+
+<h2 class="text-warning">@ViewData["Title"]</h2>
+
+<p class="text-warning">Are your sure you want to delete your account?</p>
+<form method="post">
+    <button type="submit" asp-route-confirm="yes" class="btn btn-danger">Yes</button>
+    <button type="submit" asp-route-confirm="no" class="btn btn-primary">No</button>
+</form>

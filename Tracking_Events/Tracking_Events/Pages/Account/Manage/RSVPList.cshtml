@@ -1,0 +1,39 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.RSVPListModel
+
+@{
+    ViewData["Title"] = "RSVP List for: " + Model.RSVP[0].Event.EventName;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table">
+    <thead>
+        <tr class="info">
+            <th>
+                @Html.DisplayNameFor(model => model.RSVP[0].User.Email)
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RSVP[0].RSVPCount)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.RSVP)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => item.User.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => item.User.FirstName) @Html.DisplayFor(model => item.User.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => item.RSVPCount)
+                </td>
+            </tr>}
+    </tbody>
+</table>

@@ -1,0 +1,67 @@
+﻿@page
+@model Tracking_Events.Pages.Events.ManageEventsCreateModel
+
+@{
+    ViewData["Title"] = "Create Event";
+}
+
+<h2>@ViewData["Title"]</h2>
+@Html.Partial("./Account/Manage/_StatusMessageDanger", Model.StatusMessage)
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Request.Venue.VenueName" class="control-label"></label>
+                <select asp-for="VenueID" asp-items="@Model.VenueSelectList" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Request.EventName" class="control-label"></label>
+                <input style="text-transform:capitalize" asp-for="Request.EventName" class="form-control" />
+                <span asp-validation-for="Request.EventName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Request.Genre" class="control-label"></label>
+                <input style="text-transform:capitalize" asp-for="Request.Genre" class="form-control" />
+                <span asp-validation-for="Request.Genre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Request.AgeRequirement" class="control-label"></label>
+                <input asp-for="Request.AgeRequirement" class="form-control" />
+                <span asp-validation-for="Request.AgeRequirement" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Request.StartTime" class="control-label"></label>
+                <input type="datetime-local" asp-for="Request.StartTime" class="form-control" />
+                <span asp-validation-for="Request.StartTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Request.EndTime" class="control-label"></label>
+                <input type="datetime-local" asp-for="Request.EndTime" class="form-control" />
+                <span asp-validation-for="Request.EndTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Request.Capacity" class="control-label"></label>
+                <input asp-for="Request.Capacity" class="form-control" />
+                <span asp-validation-for="Request.Capacity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Request.Description" class="control-label"></label>
+                <textarea asp-for="Request.Description" class="form-control"></textarea>
+                <span asp-validation-for="Request.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-success btn-sm" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,183 @@
+﻿@page
+@model Tracking_Events.Pages.Account.Manage.ManageRSVPsDetailsModel
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "RSVP Details";
+    string Zone;
+
+    try
+    {
+        Zone = UserManager.GetUserAsync(User).Result.TimeZone;
+    }
+    catch
+    {
+        Zone = null;
+    }
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <hr />
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.EventName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RSVP.Event.EventName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.Genre)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RSVP.Event.Genre)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.AgeRequirement)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RSVP.Event.AgeRequirement)+
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.StartTime)
+            </dt>
+            <dd>
+                @TimeZoneInfo.ConvertTimeFromUtc(Model.RSVP.Event.StartTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.EndTime)
+            </dt>
+            <dd>
+                @TimeZoneInfo.ConvertTimeFromUtc(Model.RSVP.Event.EndTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.Description)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RSVP.Event.Description)
+                <br />
+                <br />
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.Venue.Address)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RSVP.Event.Venue.Address)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.Venue.City)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RSVP.Event.Venue.City)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.Venue.State)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RSVP.Event.Venue.State)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.Venue.Zip)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.RSVP.Event.Venue.Zip)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.RSVP.Event.Venue.VenueType)
+            </dt>
+            <dd>
+                @(((Account.VenueType)Model.RSVP.Event.Venue.VenueType).ToString())
+            </dd>
+        </dl>
+    </div>
+    <div class="col-md-6">
+        <div id="map" style="width: auto; height: 400px;"></div>
+    </div>
+</div>
+<div>
+    <a asp-page="./ManageRSVPsDelete" asp-route-id="@Model.RSVP.RsvpID">Delete</a> |
+    <a asp-page="./ManageRSVPs">Back to RSVP List</a>
+</div>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAvzYPgeeulPJarwP3tpSwNW7UAZV7rJrM&callback=initMap" type="text/javascript"></script>
+<script>
+        var geocoder;
+        var map;
+        var gmarkers = [];
+        var currentMarker;
+
+        //Initializes the map and puts it into an id with 'map'
+        function initMap() {
+            geocoder = new google.maps.Geocoder();
+            var latlng = new google.maps.LatLng(-34.397, 150.644);
+            var mapOptions = {
+                zoom: 8,
+                center: latlng,
+                mapTypeId: 'roadmap'
+            }
+
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            //Current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    var icon = 'http://maps.google.com/mapfiles/kml/pal3/icon56.png'
+                    currentMarker = new google.maps.Marker({
+                        map: map,
+                        position: pos,
+                        icon: icon
+                    })
+                    map.setCenter(pos);
+                });
+            }
+
+            getlocation();
+        }
+
+        //Used to get an address and set markers
+        function getlocation() {
+            var address = @Html.Raw(Json.Serialize(Model.RSVP.Event.Venue.Address + " " + Model.RSVP.Event.Venue.City + " " + Model.RSVP.Event.Venue.State + " " + Model.RSVP.Event.Venue.Zip));
+
+            geocoder.geocode({ 'address': address }, function (results, status) {
+                if (status == 'OK') {
+                    map.setCenter(results[0].geometry.location);
+                    map.setZoom(14);
+                    deleteMarkers();
+
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location
+                    });
+                    gmarkers.push(marker);
+                    setZoom(map, gmarkers);
+                } else {
+                    alert('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+        }
+
+        //Used to Delete all map markers
+        function deleteMarkers() {
+            for (var i = 0; i < gmarkers.length; i++)
+            {
+                gmarkers[i].setMap(null);
+            }
+            gmarkers = [];
+        }
+
+        //Fit to all markers
+        function setZoom(map, gmarkers) {
+            var boundbox = new google.maps.LatLngBounds();
+            boundbox.extend(currentMarker.getPosition());
+            for (var i = 0; i < gmarkers.length; i++) {
+                boundbox.extend(gmarkers[i].getPosition());
+            }
+            map.fitBounds(boundbox);
+        }
+</script>

@@ -1,0 +1,223 @@
+﻿@page
+@model Tracking_Events.Pages.Events.DetailsModel
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Event Details";
+    string Zone;
+
+    try
+    {
+        Zone = UserManager.GetUserAsync(User).Result.TimeZone;
+    }
+    catch
+    {
+        Zone = null;
+    }
+}
+
+<h2>@ViewData["Title"]</h2>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAvzYPgeeulPJarwP3tpSwNW7UAZV7rJrM&callback=initMap" type="text/javascript"></script>
+<script>
+        var geocoder;
+        var map;
+        var gmarkers = [];
+        var currentMarker;
+
+        //Initializes the map and puts it into an id with 'map'
+        function initMap() {
+            geocoder = new google.maps.Geocoder();
+            var latlng = new google.maps.LatLng(-34.397, 150.644);
+            var mapOptions = {
+                zoom: 8,
+                center: latlng,
+                mapTypeId: 'roadmap'
+            }
+
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            //Current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    var icon = 'http://maps.google.com/mapfiles/kml/pal3/icon56.png'
+                    currentMarker = new google.maps.Marker({
+                        map: map,
+                        position: pos,
+                        icon: icon
+                    })
+                    map.setCenter(pos);
+                });
+            }
+
+            getlocation();
+        }
+
+        //Used to get an address and set markers
+        function getlocation() {
+            var address = @Html.Raw(Json.Serialize(Model.Event.Venue.Address + " " + Model.Event.Venue.City + " " + Model.Event.Venue.State + " " + Model.Event.Venue.Zip));
+
+            geocoder.geocode({ 'address': address }, function (results, status) {
+                if (status == 'OK') {
+                    map.setCenter(results[0].geometry.location);
+                    map.setZoom(14);
+                    deleteMarkers();
+
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location
+                    });
+                    gmarkers.push(marker);
+                    setZoom(map, gmarkers);
+                } else {
+                    alert('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+        }
+
+        //Used to Delete all map markers
+        function deleteMarkers() {
+            for (var i = 0; i < gmarkers.length; i++)
+            {
+                gmarkers[i].setMap(null);
+            }
+            gmarkers = [];
+        }
+
+        //Fit to all markers
+        function setZoom(map, gmarkers) {
+            var boundbox = new google.maps.LatLngBounds();
+            boundbox.extend(currentMarker.getPosition());
+            for (var i = 0; i < gmarkers.length; i++) {
+                boundbox.extend(gmarkers[i].getPosition());
+            }
+            map.fitBounds(boundbox);
+        }
+</script>
+@Html.Partial("./Account/Manage/_StatusMessage", Model.StatusMessage)
+
+<div class="row">
+    <div class="col-md-6">
+        <hr />
+        <dl class="dl-horizontal">
+            @if (Model.Event.Venue.VenueType == (int)Tracking_Events.Pages.Account.VenueType.Personal)
+            {
+                <dt class="text-primary">
+                    Hosted By
+                </dt>
+                <dd>
+                    @(Model.Event.Venue.User.FirstName + " " + Model.Event.Venue.User.LastName)
+                </dd>
+            }
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.Venue.VenueName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.Venue.VenueName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.EventName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.EventName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.Genre)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.Genre)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.AgeRequirement)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.AgeRequirement)+
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.StartTime)
+            </dt>
+            <dd>
+                @TimeZoneInfo.ConvertTimeFromUtc(Model.Event.StartTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.EndTime)
+            </dt>
+            <dd>
+                @TimeZoneInfo.ConvertTimeFromUtc(Model.Event.EndTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+            </dd>
+            <dt>
+                RSVP/@Html.DisplayNameFor(model => model.Event.Capacity)
+            </dt>
+            <dd>
+                @Model.Event.Rsvps.Where(r => r.Event.EventID == Model.Event.EventID).Sum(r => r.RSVPCount)/@Html.DisplayFor(model => model.Event.Capacity)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.Description)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.Description)
+                <br />
+                <br />
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.Venue.Address)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.Venue.Address)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.Venue.City)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.Venue.City)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.Venue.State)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.Venue.State)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.Venue.Zip)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Event.Venue.Zip)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Event.Venue.VenueType)
+            </dt>
+            <dd>
+                @(((Account.VenueType)Model.Event.Venue.VenueType).ToString())
+            </dd>
+            <dd>
+                <br />
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    @if (Model.Event.Capacity > Model.Event.Rsvps.Where(r => r.Event.EventID == Model.Event.EventID).Sum(r => r.RSVPCount) && UserManager.GetUserAsync(User).Result.AccountType == 1 && !(Model.Event.EndTime < TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, UserManager.GetUserAsync(User).Result.TimeZone).ToUniversalTime()))
+                    {
+                        <form asp-route-id="@Model.Event.EventID" asp-route-rsvpAmount="@Model.RSVPAmount" method="post">
+                            <input type="number" asp-for="@Model.RSVPAmount" min="1" max="@(Model.Event.Capacity - Model.Event.Rsvps.Count)" />
+                            <button type="submit">RSVP</button>
+                        </form>
+                    }
+                }
+            </dd>
+        </dl>
+    </div>
+    <div class="col-md-6">
+        <div id="map" style="width: auto; height: 400px;"></div>
+    </div>
+</div>
+<div>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        @if (UserManager.GetUserAsync(User).Result.AccountType == 1 && UserManager.GetUserAsync(User).Result.Id == Model.Event.Venue.User.Id && !(Model.Event.EndTime < TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, UserManager.GetUserAsync(User).Result.TimeZone).ToUniversalTime()))
+        {
+            <a asp-page="/Account/Manage/ManageEventsEdit" asp-route-id="@Model.Event.EventID">Edit Event</a> <span> | </span>
+        }
+    }
+    <a asp-page="./Index">Back to List</a>
+</div>

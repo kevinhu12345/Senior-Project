@@ -1,0 +1,106 @@
+﻿@page
+@model Tracking_Events.Pages.Reviews.Past_EventsModel
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext Context
+
+@{
+    ViewData["Title"] = "Past Events";
+    string Zone;
+
+    try
+    {
+        Zone = UserManager.GetUserAsync(User).Result.TimeZone;
+    }
+    catch
+    {
+        Zone = null;
+    }
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form class="form-inline" asp-page="./Past_Events" method="get">
+    <div class="form-group">
+        <label>Venue Filter:</label>
+        <input name="searchVenue" value="@Model.CurrentVenueSearch" class="form-control" />
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Filter" class="btn btn-info btn-sm" /> |
+        <a asp-page="./Past_Events">Back to full list</a>
+    </div>
+</form>
+<table class="table">
+    <thead>
+        <tr class="info">
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Venue.VenueName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].EventName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Genre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].AgeRequirement)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].StartTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].EndTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Capacity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Event[0].Description)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Event)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Venue.VenueName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EventName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Genre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AgeRequirement)
+                </td>
+                <td>
+                    @TimeZoneInfo.ConvertTimeFromUtc(item.StartTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+                </td>
+                <td>
+                    @TimeZoneInfo.ConvertTimeFromUtc(item.EndTime, TimeZoneInfo.FindSystemTimeZoneById(Zone != null ? Zone : "UTC")).ToString("g")
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Capacity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    <a asp-page="/Events/Details" asp-route-id="@item.EventID">Details</a>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        RSVP r = Context.RSVP.Where(rv => rv.User == UserManager.GetUserAsync(User).Result).FirstOrDefault();
+                        if (item.Rsvps.Contains(r) && !Context.Review.Any(rev => rev.User == UserManager.GetUserAsync(User).Result))
+                        {
+                            <span> | </span>
+                            <a asp-page="./Create" asp-route-eventId="@item.EventID" asp-route-venueId="@item.Venue.VenueID">Review</a>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
